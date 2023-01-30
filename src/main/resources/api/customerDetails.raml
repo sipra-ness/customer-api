@@ -1,0 +1,49 @@
+#%RAML 1.0 Library
+
+types:
+    customerDetails:
+      type: object
+      properties:
+        customerId:
+          type: string
+          required: false
+        personalInformation:
+            type: object
+            properties:
+              firstName:
+                type: string
+                required: true
+              lastName:
+                type: string
+                required: true
+              companyName: 
+                type: string
+                required: true
+              email: 
+                type: string
+                required: true
+              phone: 
+                type: string
+                required: true
+
+        address: 
+          type: array
+          items:
+            properties:
+              street:
+                type: string
+                required: true
+              houseNumber:
+                type: number
+                required: true
+              city:
+                type: string
+                required: true
+              country:
+                type: string
+                required: true
+              postalCode:
+                type: string
+                minLength: 3
+                maxLength: 6
+                

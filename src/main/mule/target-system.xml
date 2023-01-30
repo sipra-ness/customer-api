@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	
+	<sub-flow name="create-customer-sub-flow" doc:id="f6b9c848-eb63-49c1-8062-5265c61aaf12" >
+		<ee:transform doc:name="customer Id" doc:id="11f250ed-b69c-44a1-bc4c-9d14e38626a5" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="custId" ><![CDATA[%dw 2.0
+output application/java
+---
+uuid()]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="data for sfdc and db" doc:id="7c3db9e0-20a7-44b0-8c4e-914d9207ade8">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="sfdcdata"><![CDATA[%dw 2.4
+output application/json
+---
+{
+  "customerId": vars.custId,
+  "firstName": payload.personalInformation.firstName,
+  "lastName": payload.personalInformation.lastName,
+  "companyName": payload.personalInformation.companyName,
+  "email": payload.personalInformation.email,
+  "phone": payload.personalInformation.phone
+}
+]]></ee:set-variable>
+						<ee:set-variable variableName="dbdata"><![CDATA[%dw 2.4
+output application/json
+---
+{
+    "customerId" : vars.custId,
+    "personalInformation": payload.personalInformation,
+    "address" : payload.address
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+		<flow-ref doc:name="target-system-sub-flow" doc:id="db1798cd-23f8-482e-93ad-8eb6a924f4f6" name="target-system-sub-flow"/>
+		<logger level="INFO" doc:name="success info" doc:id="08f96e2f-df1e-4a36-bf40-8db16f8ba97c" message="Created new customer entry to CRM System &amp; Cosmos DB  successfully!" />
+	</sub-flow>
+	<sub-flow name="get-customer-details" doc:id="ca149211-d46b-42ab-bf07-0e25f61824c4" >
+		<set-variable value="#[attributes.queryParams.CustomerID]" doc:name="Set Variable" doc:id="dc63c6b9-c994-4166-ba4a-036f2437402f" variableName="custId"/>
+		<http:request method="GET" doc:name="get customer details" doc:id="63b9dc4b-de0d-4335-854a-1c641f5103a9" path="${db.get.path}" config-ref="db_Request_configuration" outputMimeType="application/json" outputEncoding="UTF-8">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"custId" : vars.custId
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="info logger" doc:id="43b3dfc5-139c-4e04-89fa-b2766665483e" message="Customer details received successfully!!"/>
+	</sub-flow>
+	<sub-flow name="update-customer-sub-flow" doc:id="cfcbf796-b9e9-438f-a828-f967d0b42542" >
+		<ee:transform doc:name="data for sfdc and db" doc:id="04e5e6ef-450d-495f-ae61-e384e33fb651" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sfdcdata" ><![CDATA[%dw 2.4
+output application/json
+---
+{
+  "customerId": payload.customerId,
+  "firstName": payload.personalInformation.firstName,
+  "lastName": payload.personalInformation.lastName,
+  "companyName": payload.personalInformation.companyName,
+  "email": payload.personalInformation.email,
+  "phone": payload.personalInformation.phone
+}
+]]></ee:set-variable>
+				<ee:set-variable variableName="dbdata" ><![CDATA[%dw 2.4
+output application/json
+---
+payload]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="target-system-sub-flow" doc:id="04fb1512-b0d6-403a-a2fa-08f44f8cc8bc" name="target-system-sub-flow"/>
+		<logger level="INFO" doc:name="success info" doc:id="ef4653b1-3681-4beb-9d77-20b6603fb89f" message="Updated customer entry to CRM System &amp; Cosmos DB  successfully!" />
+	</sub-flow>
+	<sub-flow name="target-system-sub-flow" doc:id="4de9d104-df18-406c-8223-f24d6aae3cdf" >
+		<try doc:name="Try" doc:id="b35c1068-72e5-4553-9b91-c040800b2570" transactionalAction="BEGIN_OR_JOIN" >
+			<http:request method="POST" doc:name="sfdc" doc:id="160b4f43-1d71-41df-a01e-8db3a71239e5" config-ref="crm_Request_configuration" path="/mock" >
+				<http:body ><![CDATA[#[vars.sfdcdata]]]></http:body>
+			</http:request>
+			<logger level="INFO" doc:name="sfdc info" doc:id="43144a5d-57f2-4c50-809f-5a7bb116d0a7" message="SFDC:::#[payload]"/>
+			<http:request method="POST" doc:name="db" doc:id="bcb343aa-b1e3-407c-bee7-ac988b1ed2a1" config-ref="db_Request_configuration" path="/mockdb" >
+				<http:body ><![CDATA[#[vars.dbdata]]]></http:body>
+			</http:request>
+			<logger level="INFO" doc:name="db info" doc:id="ec73ffa3-6891-4e92-b780-5cb4327e936b" message="DB:::#[payload]"/>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e89ab132-1985-47e0-8c21-4b86438b0fbf" >
+					<raise-error doc:name="Raise error" doc:id="87013ad8-fd84-482e-a602-ccf307581728" type="MULE:CONNECTIVITY" description="One of the end system is down!" />
+				</on-error-propagate>
+			</error-handler>
+		</try>
+	</sub-flow>
+</mule>

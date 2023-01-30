@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="target-system-test-suite.xml" />
+	<munit:test name="target-system-test-suite-update-customer-sub-flowTest-positive-scenario" doc:id="9c2a5ad1-b595-4152-844f-94767b1feb74" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="sfdc" doc:id="2f6bf3ee-6f99-4424-b31c-6d0e6980651d" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sfdc-payload.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="db" doc:id="ec120586-7ada-4d06-b115-dcb6b46ce95a" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('db-payload.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="79c5f831-9b45-4a98-ac75-1c026962ec4c">
+				<munit:payload value="#[MunitTools::getResourceAsString('customer.json')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="sfdcdata" value="#[MunitTools::getResourceAsString('customer.json')]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to update-customer-sub-flow" doc:id="4e5e7181-967e-4e2c-b603-dd71f304b209" name="update-customer-sub-flow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="sfdc" doc:id="cc925497-2fa0-434e-a2b2-b9244413972f" processor="http:request" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="db" doc:id="3f0c4900-0dea-4e67-bf47-876e0be3b796" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert-equals doc:name="response check" doc:id="8106ac96-ccb6-4661-83de-47d78a6b8d0f" actual="#[payload]" expected='#[{&#10;  "customerId": "a8409df4-57f1-4f6b-b2cf-6ccc420c9abc",&#10;  "personalInformation": {&#10;    "firstName": "Ulrich",&#10;    "lastName": "Nielsen",&#10;    "companyName": "E-ffoc",&#10;    "email": "ulrichN@effoc.com",&#10;    "phone": "+494341927420"&#10;  },&#10;  "address": [&#10;    {&#10;      "street": "Steinbrueckstrasse",&#10;      "houseNumber": 114,&#10;      "city": "Nuremberg",&#10;      "country": "Germany",&#10;      "postalCode": "90408"&#10;    }&#10;  ]&#10;}]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="target-system-test-suite-update-customer-sub-flowTest-negative-scenario" doc:id="b96040ab-60b2-4dcf-b821-7dab91901b00" description="Test" expectedErrorType="MULE:CONNECTIVITY" expectedErrorDescription="One of the end system is down!">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="sfdc" doc:id="b250fe73-2001-4bdb-8763-800b16da2c90" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sfdc-payload.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="91ce8300-2d14-4cbd-8d9a-14b2e42c48b5" >
+				<munit:payload value="#[MunitTools::getResourceAsString('customer.json')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="sfdcdata" value="#[MunitTools::getResourceAsString('customer.json')]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to update-customer-sub-flow" doc:id="e0b54de6-dbe0-4be9-bde0-d56b8f079dfb" name="update-customer-sub-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="sfdc" doc:id="8519ab9c-a62a-4907-9745-b9042f75df14" processor="http:request" atLeast="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="target-system-test-suite-create-customer-sub-flowTest-positive-scenario" doc:id="7c707956-a561-43dc-859d-13b0205a7d98" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="sfdc" doc:id="72a33eb3-b5ba-415e-bedd-f66f51f890a4" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sfdc-payload.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="db" doc:id="b798c492-11ef-4320-bfc0-e4d3de08b1b2" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('db-payload.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="fbebd97a-61ea-4218-934d-d0c2c93913e4">
+				<munit:payload value="#[MunitTools::getResourceAsString('create-customer.json')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="sfdcdata" value="#[MunitTools::getResourceAsString('customer.json')]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to create-customer-sub-flow" doc:id="834bc3d9-5775-4499-860f-65964e8ff08b" name="create-customer-sub-flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="sfdc" doc:id="9d2546c3-bc34-4850-a678-9547ca2e2649" processor="http:request" atLeast="1" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="sfdc" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="db" doc:id="aa72eae4-0ebb-4979-bd5c-007e7dd9ceac" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="target-system-test-suite-create-customer-sub-flowTest-negative-scenario" doc:id="1688d212-7a67-4409-ac98-d0d0f19862a5" description="Test" expectedErrorType="MULE:CONNECTIVITY" expectedErrorDescription="One of the end system is down!">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="db" doc:id="c446c39d-ffd5-47f5-bc80-f94f3fa69348" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('db-payload.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d44ed8a0-69b7-4fb0-8f46-a57d35670f54" >
+				<munit:payload value="#[MunitTools::getResourceAsString('create-customer.json')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:variables >
+					<munit:variable key="sfdcdata" value="#[MunitTools::getResourceAsString('customer.json')]" />
+				</munit:variables>
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to create-customer-sub-flow" doc:id="6df6d07f-4829-4e15-9248-01067a8775b8" name="create-customer-sub-flow" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="db" doc:id="fcb55bcc-59a9-417c-9ac6-45f60aea4a45" processor="http:request" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="db" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

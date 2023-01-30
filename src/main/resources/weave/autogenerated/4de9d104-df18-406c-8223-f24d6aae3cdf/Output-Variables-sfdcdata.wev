@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_4de9d104_df18_406c_8223_f24d6aae3cdf_Output_Variables_sfdcdata = Any
+

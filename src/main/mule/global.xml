@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<apikit:config name="customer-api-config" api="customer-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <http:listener-config name="reseller_Listener_config" doc:name="HTTP Listener config" doc:id="4a1647b3-7d7f-4ab0-b74f-048e60eb3de6" >
+		<http:listener-connection host="${host}" port="${port}" />
+	</http:listener-config>
+	<http:request-config name="crm_Request_configuration" doc:name="HTTP Request configuration" doc:id="7fc1cbb7-7b52-4a40-9bdd-f9d6d616ddc4" >
+		<http:request-connection host="${sfdc.host}" port="${sfdc.port}" />
+	</http:request-config>
+	<http:request-config name="db_Request_configuration" doc:name="HTTP Request configuration" doc:id="1175b4d9-b26b-4153-a4ff-253f6e728efa" >
+		<http:request-connection host="${db.host}" port="${db.port}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="bfe3f24d-1e79-4bd0-a37d-658692bc3a0d" file="sandbox.properties" />
+</mule>

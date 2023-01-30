@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="customer-api-test-suite.xml" />
+	<munit:test name="customer-api-test-suite-get:\customer:customer-api-configTest-positive-scenario" doc:id="318f3033-5d76-4f3d-8b2b-7e98c1843477" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="db" doc:id="42b49fa5-dc5b-4e9d-aadc-460f31b09af8" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="358bc9a4-4262-4f4c-9a80-374197e73d3f" >
+				<munit:attributes value='#[{ "queryParams": {"CustomerID": "4d4de7d6-7f5e-4778-9c70-babba6c25c55"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\customer:customer-api-config" doc:id="6ea11981-9830-4781-a5c9-6bbf2869c294" name="get:\customer:customer-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="verify db system call" doc:id="b594fa54-aa8d-422a-9f16-c73229e5b282" processor="http:request" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="customer-api-test-suite-get:\customer:customer-api-configTest-negative-scenario" doc:id="ce783e79-a4d1-4b1d-a36c-414cdba7ed54" description="Test" expectedErrorType="HTTP:CONNECTIVITY">
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="5dd7ba76-3f91-4dfd-a557-2695b0110f81">
+				<munit:attributes value='#[{ "queryParams": {"CustomerID": "4d4de7d6-7f5e-4778-9c70-babba6c25c55"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get:\customer:customer-api-config" doc:id="9cfd0c4c-befe-480c-aae0-71c6b77ca221" name="get:\customer:customer-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="verify db system call" doc:id="4debe7a1-aee2-449f-bb38-8da01c5e1e61" processor="http:request" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="get customer details" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,70 @@
+#%RAML 1.0
+title: Customer API
+description: This is POC based API which depicts the bussiness communication happens between reseller ecommerce system and Fuank CRM salesforce system.
+
+protocols:
+  - HTTPS
+version: v1
+mediaType: 
+- application/json
+securitySchemes:
+  basicAuth:
+     type: Basic Authentication
+     description: We have to use basic Authentication as per the requirement
+uses:
+  requestType : customerDetails.raml
+traits:
+  errorType : !include errorResponse.raml
+/customer:
+  post:
+    securedBy: [basicAuth]
+    description: This method is used to create the new customer entry in Fuank CRM system.
+    body:
+      application/json:
+        type: requestType.customerDetails
+        example: !include create-customer.json
+           
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "Response": "New customer entry happened successfully!"
+              }
+    is : [errorType]
+  put:
+    securedBy: [basicAuth]
+    description: This method is used to update the existing Customer entries in Fuank CRM system.
+    body:
+      application/json:
+        type: requestType.customerDetails
+        example: !include customer.json
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                "Response": "Customer Entry updated successfully!"
+              }
+    is : [errorType]
+  get:
+    securedBy: [basicAuth]
+    description: To retrieve any details from CRM system based on customer ID.
+    queryParameters:
+      CustomerID:
+        type: string
+        minLength: 1
+        maxLength: 100
+    responses:
+      200:
+        body:
+          application/json:
+            
+    is : [errorType]
+    
+            
+
+
+  
